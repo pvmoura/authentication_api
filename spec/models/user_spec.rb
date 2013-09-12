@@ -35,6 +35,7 @@ describe User do
   describe "when email already in system" do
   	before do
   	  duplicate_user = @user.dup
+  	  duplicate_user.email = duplicate_user.email.upcase
   	  duplicate_user.save
   	end
 
