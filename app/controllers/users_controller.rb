@@ -31,36 +31,45 @@ end
 
 class UsersController < ApplicationController
   def sign_in
+  	response = {}
   	if request.post?
-  	  response = {}
-  	  begin
-  	  	parsed_data = JSON.parse params[:data]
-  	  rescue
-  	    response[:error] = "malformed json"
-  	  end
+  	  data = request.raw_post()
+  	  if data != nil
+	  	begin
+	  	  parsed_data = JSON.parse data
+	  	rescue
+	  	  response[:error] = "malformed json"
+	  	end
 
-  	  if response.empty?
-  	    response = check_for_errors(parsed_data, response)
-  	  	if response.empty?
-  	  	  # now login user
-  	  	  user = User.where(email: parsed_data.fetch('email')).take(1)[0]
-  	  	  if user != nil
-	  	  	user = user.authenticate(parsed_data.fetch('password'))
-	  	  	if user != false
-	  	  	  user.auth_token = 's3kr3t-value'
-	  	  	  user.save
-	  	  	  user.name = user.name.gsub(/\s+/, "")
-	  	  	  response = user.as_json(except:
-	  	  	  			   [:created_at, :last_modified, :updated_at, :password_digest])
-	  	  	else
-	  	  	  response[:error] = "email/password combination not found"
-	  	  	end
-	  	  else
-	  	  	response[:error] = "email not found in database"
+	  	if response.empty?
+	  	  response = check_for_errors(parsed_data, response)
+	  	  if response.empty?
+	  	    # now login user
+	  	    user = User.where(email: parsed_data.fetch('email')).take(1)[0]
+	  	  	if user != nil
+		  	  user = user.authenticate(parsed_data.fetch('password'))
+		  	  if user != false
+		  	  	user.auth_token = 's3kr3t-value'
+		  	  	user.save
+		  	  	user.name = user.name.gsub(/\s+/, "")
+		  	  	response = user.as_json(except:
+		  	  			   [:created_at, :last_modified, :updated_at, :password_digest])
+		  	  else
+		  	  	response[:error] = "email/password combination not found"
+		  	  end
+		  	else
+		  	  response[:error] = "email not found in database"
+		  	end
 	  	  end
-  	  	end
+	  	end
+	  else
+	  	response[:error] = "No payload found"
+	  end
+  	  respond_to do |format|
+  	    format.json { render json: response }
   	  end
-
+  	else
+  	  response[:error] = "No GETs allowed."
   	  respond_to do |format|
   	  	format.json { render json: response }
   	  end
