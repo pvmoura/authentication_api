@@ -20,7 +20,9 @@ def check_for_errors(parsed_data, response)
 
   if response.empty? && parsed_data.keys.length == 4
 	if !is_valid_email(parsed_data.fetch('email'))
-	  response[:error] "email is invalid"
+	  response[:error] = "email is invalid"
+	elsif parsed_data['password'] != parsed_data['password_confirmation']
+	  response[:error] = "passwords don't match"
 	end
   end
 
@@ -40,16 +42,25 @@ class UsersController < ApplicationController
   	  if response.empty?
   	    response = check_for_errors(parsed_data, response)
   	  	if response.empty?
-  	  	# now login user
-  	  	  user = User.where(email: parsed_data.fetch('email')).take(1)
-  	  	  user = user.authenticate(parsed_data.fetch('password'))
-  	  	  if user != false
-  	  	  	user.generate_new_auth_token()
-  	  	  	response = user.as_json(except:
-  	  	  			   [:id, :created_at, :last_modified, :updated_at, :password_digest])
-  	  	  end
+  	  	  # now login user
+  	  	  user = User.where(email: parsed_data.fetch('email')).take(1)[0]
+  	  	  if user != nil
+	  	  	user = user.authenticate(parsed_data.fetch('password'))
+	  	  	if user != false
+	  	  	  user.auth_token = 's3kr3t-value'
+	  	  	  user.save
+	  	  	  user.name = user.name.gsub(/\s+/, "")
+	  	  	  response = user.as_json(except:
+	  	  	  			   [:created_at, :last_modified, :updated_at, :password_digest])
+	  	  	else
+	  	  	  response[:error] = "email/password combination not found"
+	  	  	end
+	  	  else
+	  	  	response[:error] = "email not found in database"
+	  	  end
   	  	end
   	  end
+
   	  respond_to do |format|
   	  	format.json { render json: response }
   	  end
