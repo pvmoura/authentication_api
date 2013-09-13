@@ -39,3 +39,5 @@ Possible error messages:
     {error: "email not found in database"}
 
     {error: "email/password combination not found"}
+
+    {error: "No payload found"}

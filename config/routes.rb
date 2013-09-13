@@ -1,7 +1,6 @@
 AuthenticationApi::Application.routes.draw do
-  get "users/sign_in"
   post "users/sign_in"
-
+  get "users/test"
   # The priority is based upon order of creation:
   # first created -> highest priority.
 

@@ -34,7 +34,7 @@ class UsersController < ApplicationController
   	response = {}
   	if request.post?
   	  data = request.raw_post()
-  	  if data != nil
+  	  if !data.empty?
 	  	begin
 	  	  parsed_data = JSON.parse data
 	  	rescue
@@ -74,5 +74,8 @@ class UsersController < ApplicationController
   	  	format.json { render json: response }
   	  end
   	end
+  end
+
+  def test
   end
 end
