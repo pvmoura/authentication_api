@@ -19,7 +19,7 @@ Sample Response:
     "id": 1,
     "name": "JohnDoe",
     "email": "john@doe.com",
-    "authentication_token": "s3kr3t-value"
+    "auth_token": "s3kr3t-value"
     }
 
 Required request parameters: name, email, password, password_confirmation
